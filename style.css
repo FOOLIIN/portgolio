@@ -1,0 +1,191 @@
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+a { color: var(--text); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+/* ===== 主题变量 ===== */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #666;
+  --border: #e5e5e5;
+  --accent: #2563eb;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --surface: #2a2a2a;
+  --text: #f5f5f5;
+  --muted: #9a9a9a;
+  --border: #3a3a3a;
+  --accent: #60a5fa;
+}
+
+/* ===== 导航栏 ===== */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: .75rem 1.5rem;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: var(--text);
+  letter-spacing: .02em;
+}
+
+/* 主菜单 */
+.nav-menu ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-menu a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: .95rem;
+  opacity: .85;
+  transition: opacity .15s ease, color .15s ease;
+}
+.nav-menu a:hover { opacity: 1; color: var(--accent); }
+
+/* 工具按钮 */
+.nav-tools { display: flex; align-items: center; gap: .5rem; }
+.icon-btn, .nav-toggle {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+  padding: .35rem .55rem;
+  border-radius: .375rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background-color .15s ease;
+}
+.icon-btn:hover { background-color: var(--border); }
+.nav-toggle { display: none; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* ===== 页脚 ===== */
+.site-footer {
+  margin-top: 3rem;
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1.5rem;
+}
+.footer-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+  justify-content: flex-start;
+}
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.footer-title {
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin: 0 0 .75rem;
+}
+.footer-col a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: .95rem;
+  opacity: .85;
+  transition: opacity .15s ease, color .15s ease;
+}
+.footer-col a:hover { opacity: 1; color: var(--accent); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.footer-copy {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.back-to-top {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: .85rem;
+  transition: color .15s ease;
+}
+.back-to-top:hover { color: var(--accent); }
+
+@media (max-width: 768px) {
+  .footer-cols { gap: 2rem; }
+  .footer-bottom { justify-content: center; text-align: center; }
+}
+
+/* ===== 移动端抽屉菜单 ===== */
+.nav-drawer { display: none; }
+.nav-drawer ul {
+  list-style: none;
+  margin: 0;
+  padding: .5rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  border-top: 1px solid var(--border);
+}
+.nav-drawer a {
+  display: block;
+  padding: .65rem .5rem;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: .375rem;
+  transition: background-color .15s ease, color .15s ease;
+}
+.nav-drawer a:hover { background-color: var(--border); color: var(--accent); }
+.nav-drawer[hidden] { display: none !important; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .nav-menu { display: none; }
+  .nav-toggle { display: inline-block; }
+  .nav-drawer { display: block; }
+  .nav-inner { padding: .75rem 1rem; }
+}
