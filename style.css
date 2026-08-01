@@ -19,6 +19,18 @@ body {
   --border: #e5e5e5;
   --accent: #2563eb;
 }
+/* 跟随系统:系统为深色时默认深色(手动选浅色时除外) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1a1a;
+    --surface: #2a2a2a;
+    --text: #f5f5f5;
+    --muted: #9a9a9a;
+    --border: #3a3a3a;
+    --accent: #60a5fa;
+  }
+}
+/* 手动选择深色 */
 [data-theme="dark"] {
   --bg: #1a1a1a;
   --surface: #2a2a2a;

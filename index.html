@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,7 +43,10 @@
   <main>
     <p>我是一名普通的大学生</p>
     <p>这个站点是我用来学习和展示的</p>
-    
+    <section id="projects">
+      <h2>我的项目</h2>
+      <div id="repo-list">加载中.....</div>
+    </section>
   </main>
 
   <!-- 页脚 -->
@@ -78,26 +81,50 @@
     (function () {
       var root = document.documentElement;
       var KEY = 'site-theme';
-      var stored = null;
-      try { stored = localStorage.getItem(KEY); } catch (e) {}
-      if (stored === 'dark' || stored === 'light') {
-        root.setAttribute('data-theme', stored);
+      var MODES = ['dark', 'light', 'system'];
+      var ICONS = { dark: '🌙', light: '☀️', system: '🖥️' };
+      var LABELS = {
+        dark: '当前:深色,点击切换',
+        light: '当前:浅色,点击切换',
+        system: '当前:跟随系统,点击切换'
+      };
+      function getStored() {
+        try { return localStorage.getItem(KEY); } catch (e) { return null; }
       }
+      function setStored(v) {
+        try { localStorage.setItem(KEY, v); } catch (e) {}
+      }
+      var mode = getStored();
+      if (MODES.indexOf(mode) === -1) mode = 'system'; // 默认跟随系统
+
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      function systemDark() { return mq.matches; }
+
       var btn = document.getElementById('theme-toggle');
-      if (btn) {
-        function sync() {
-          var dark = root.getAttribute('data-theme') === 'dark';
-          btn.textContent = dark ? '☀️' : '🌙';
+      function apply() {
+        var dark = mode === 'dark' || (mode === 'system' && systemDark());
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (btn) {
+          btn.textContent = ICONS[mode];
+          btn.setAttribute('aria-label', LABELS[mode]);
           btn.setAttribute('aria-pressed', String(dark));
         }
-        sync();
+      }
+      if (btn) {
         btn.addEventListener('click', function () {
-          var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          root.setAttribute('data-theme', next);
-          try { localStorage.setItem(KEY, next); } catch (e) {}
-          sync();
+          var i = MODES.indexOf(mode);
+          mode = MODES[(i + 1) % MODES.length];
+          setStored(mode);
+          apply();
         });
       }
+      // 系统主题变化时实时跟随
+      if (mq.addEventListener) {
+        mq.addEventListener('change', apply);
+      } else if (mq.addListener) {
+        mq.addListener(apply);
+      }
+      apply();
 
       // 移动端抽屉菜单
       var toggle = document.getElementById('nav-toggle');
@@ -124,6 +151,30 @@
           }
         });
       }
+      fetch('https://api.github.com/users/FOOLIIN/repos')
+        .then(function (response) {
+          if(!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(function (repos) {
+          var box = document.getElementById('repo-list');
+          box.innerHTML = '';
+          repos.forEach(function (repo) {
+            var card = document.createElement('div');
+            card.className = 'repo-card';
+            card.innerHTML = `
+              <h3 class="repo-title">${repo.name}</h3>
+              <p class="repo-desc">${repo.description}</p>
+              <a href="${repo.html_url}" class="repo-link" target="_blank" rel="noopener">View on GitHub</a>
+            `;
+            box.appendChild(card);
+          });
+        })
+        .catch(function (error) {
+          console.error(' GITHUB API Error:', error);
+        });
     })();
   </script>
 </body>
