@@ -201,3 +201,103 @@ main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
   .nav-drawer { display: block; }
   .nav-inner { padding: .75rem 1rem; }
 }
+/* ===== 仓库卡片  ===== */
+#projects { margin-top: 2rem; }
+#repo-list { display: grid; gap: 1rem; }
+.repo-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  padding: 1rem 1.25rem;
+  transition: box-shadow .15s ease;
+}
+     .repo-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }                                                                                                                              
+     .repo-card h3 { margin: 0 0 .5rem; font-size: 1.05rem; }                                                                                                                                 
+     .repo-card h3 a { color: var(--accent); text-decoration: none; }                                                                                                                         
+     .repo-card h3 a:hover { text-decoration: underline; }                                                                                                                                    
+     .repo-card p { margin: 0 0 .5rem; color: var(--muted); font-size: .9rem; }                                                                                                               
+     .repo-card span { font-size: .85rem; color: var(--muted); }
+
+/* ===== 博客(Week3) ===== */
+/* 列表区 */
+#list-view { margin-top: 1rem; }
+#list-view h1 { font-size: 1.75rem; margin: 0 0 1.25rem; }
+.blog-new-btn {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: .375rem;
+  padding: .5rem 1rem;
+  font-size: .95rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: opacity .15s ease;
+}
+.blog-new-btn:hover { opacity: .85; }
+
+#post-list { display: flex; flex-direction: column; gap: 1rem; }
+.post-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  padding: 1rem 1.25rem;
+  transition: box-shadow .15s ease;
+}
+.post-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.post-card h3 { margin: 0 0 .35rem; font-size: 1.1rem; }
+.post-card .post-date { font-size: .8rem; color: var(--muted); margin-bottom: .5rem; }
+.post-card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.post-empty { color: var(--muted); font-size: .95rem; }
+
+/* 编辑器区 */
+#editor-view { margin-top: 1rem; }
+#editor-view h1 { font-size: 1.75rem; margin: 0 0 1.25rem; }
+#title-input {
+  display: block;
+  width: 100%;
+  padding: .6rem .75rem;
+  font-size: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: .375rem;
+  background-color: var(--surface);
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+#editor {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  padding: .75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: .375rem;
+  background-color: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+#preview {
+  border: 1px solid var(--border);
+  border-radius: .375rem;
+  padding: .75rem 1rem;
+  background-color: var(--surface);
+  margin-bottom: 1rem;
+}
+.blog-actions { display: flex; gap: .75rem; }
+#save-btn, #back-btn {
+  border: none;
+  border-radius: .375rem;
+  padding: .5rem 1.25rem;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+#save-btn { background-color: var(--accent); color: #fff; }
+#back-btn { background-color: transparent; border: 1px solid var(--border); color: var(--text); }
+#save-btn:hover, #back-btn:hover { opacity: .8; }
+
+/* 响应式:手机上编辑器与预览上下叠 */
+@media (max-width: 768px) {
+  #editor { min-height: 180px; }
+}
