@@ -297,7 +297,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
 #back-btn { background-color: transparent; border: 1px solid var(--border); color: var(--text); }
 #save-btn:hover, #back-btn:hover { opacity: .8; }
 
+.editor-row { display: flex; gap: 1rem; }
+#editor { flex: 1; }
+#preview { flex: 1; }
+
 /* 响应式:手机上编辑器与预览上下叠 */
 @media (max-width: 768px) {
   #editor { min-height: 180px; }
+  .editor-row { flex-direction: column; }
 }
