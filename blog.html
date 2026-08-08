@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="fool 的博客" />
+  <title>fool的博客</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- 顶部导航栏 -->
+  <header class="site-nav">
+    <div class="nav-inner">
+      <!-- Logo -->
+      <a href="index.html" class="logo" aria-label="首页">fool</a>
+
+      <!-- 主菜单 -->
+      <nav class="nav-menu" aria-label="主导航">
+        <ul>
+          <li><a href="index.html">首页</a></li>
+          <li><a href="blog.html">博客</a></li>
+        </ul>
+      </nav>
+
+      <!-- 工具按钮 -->
+      <div class="nav-tools">
+        <button type="button" class="icon-btn" aria-label="搜索">🔍</button>
+        <button type="button" class="icon-btn" id="theme-toggle" aria-label="切换主题" aria-pressed="false">🌙</button>
+        <button type="button" class="nav-toggle" id="nav-toggle" aria-label="菜单" aria-expanded="false">☰</button>
+      </div>
+    </div>
+
+    <!-- 移动端抽屉菜单 -->
+    <nav class="nav-drawer" id="nav-drawer" aria-label="移动端导航" hidden>
+      <ul>
+        <li><a href="index.html">首页</a></li>
+        <li><a href="blog.html">博客</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- 页面主体 -->
+  <main>
+    <!-- 列表区(默认显示) -->
+    <section id="list-view">
+      <h1>博客</h1>
+      <button type="button" id="new-post-btn" class="blog-new-btn">写新文章</button>
+      <div id="post-list"></div>
+    </section>
+
+    <!-- 编辑器区(默认隐藏,点"写新文章"后显示) -->
+    <section id="editor-view" hidden>
+      <h1>写文章</h1>
+      <input type="text" id="title-input" placeholder="文章标题" autocomplete="off" />
+      <textarea id="editor" placeholder="写点什么..."></textarea>
+      <div id="preview"></div>
+      <div class="blog-actions">
+        <button type="button" id="save-btn">保存</button>
+        <button type="button" id="back-btn">返回列表</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-cols">
+        <nav class="footer-col" aria-label="页脚导航">
+          <h2 class="footer-title">导航</h2>
+          <ul>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="blog.html">博客</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-col" aria-label="联系方式">
+          <h2 class="footer-title">联系</h2>
+          <ul>
+            <li><a href="https://github.com/FOOLIIN" target="_blank" rel="noopener">GitHub 主页</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© <span id="year">2026</span> fool. All rights reserved.</p>
+        <a href="#page" class="back-to-top" aria-label="回到顶部">Scroll to Top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== 主题切换(Week1,从 index.html 抄来)=====
+    (function () {
+      var root = document.documentElement;
+      var KEY = 'site-theme';
+      var MODES = ['dark', 'light', 'system'];
+      var ICONS = { dark: '🌙', light: '☀️', system: '🖥️' };
+      var LABELS = {
+        dark: '当前:深色,点击切换',
+        light: '当前:浅色,点击切换',
+        system: '当前:跟随系统,点击切换'
+      };
+      function getStored() {
+        try { return localStorage.getItem(KEY); } catch (e) { return null; }
+      }
+      function setStored(v) {
+        try { localStorage.setItem(KEY, v); } catch (e) {}
+      }
+      var mode = getStored();
+      if (MODES.indexOf(mode) === -1) mode = 'system';
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      function systemDark() { return mq.matches; }
+      var btn = document.getElementById('theme-toggle');
+      function apply() {
+        var dark = mode === 'dark' || (mode === 'system' && systemDark());
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (btn) {
+          btn.textContent = ICONS[mode];
+          btn.setAttribute('aria-label', LABELS[mode]);
+          btn.setAttribute('aria-pressed', String(dark));
+        }
+      }
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var i = MODES.indexOf(mode);
+          mode = MODES[(i + 1) % MODES.length];
+          setStored(mode);
+          apply();
+        });
+      }
+      if (mq.addEventListener) {
+        mq.addEventListener('change', apply);
+      } else if (mq.addListener) {
+        mq.addListener(apply);
+      }
+      apply();
+    })();
+
+    // ===== 移动端抽屉菜单(Week1,从 index.html 抄来)=====
+    (function () {
+      var toggle = document.getElementById('nav-toggle');
+      var drawer = document.getElementById('nav-drawer');
+      if (toggle && drawer) {
+        toggle.addEventListener('click', function () {
+          var open = drawer.hasAttribute('hidden');
+          if (open) {
+            drawer.removeAttribute('hidden');
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.textContent = '✕';
+          } else {
+            drawer.setAttribute('hidden', '');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.textContent = '☰';
+          }
+        });
+        drawer.addEventListener('click', function (e) {
+          if (e.target.tagName === 'A') {
+            drawer.setAttribute('hidden', '');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.textContent = '☰';
+          }
+        });
+      }
+    })();
+    var newbtn=document.getElementById('new-post-btn');
+    newbtn.addEventListener('click', function () {
+      var listView = document.getElementById('list-view');
+      var editor = document.getElementById('editor-view');
+      listView.setAttribute('hidden', '');
+      editor.removeAttribute('hidden');
+    });
+    var backbtn=document.getElementById('back-btn');
+    backbtn.addEventListener('click', function () {
+      var listView = document.getElementById('list-view');
+      var editor = document.getElementById('editor-view');
+     
+      listView.removeAttribute('hidden');
+      renderList();
+      editor.setAttribute('hidden', '');
+    });
+   
+    var savebtn=document.getElementById('save-btn');
+    savebtn.addEventListener('click', function () {
+      var title = document.getElementById('title-input').value;
+      var content = document.getElementById('editor').value;
+      var preview = document.getElementById('preview').innerHTML;
+      var post = {
+        title: title,
+        content: content,
+        id: Date.now(),
+        preview: preview
+      };
+      var posts = JSON.parse(localStorage.getItem('posts')) || [];
+      posts.push(post);
+      localStorage.setItem('posts', JSON.stringify(posts));
+      alert('保存成功！');
+      console.log('标题:', title);
+      console.log('内容:', content);
+    });
+    var editorEL = document.getElementById('editor');
+    var preview = document.getElementById('preview');
+    editorEL.addEventListener('input', function () {
+      preview.innerHTML = editorEL.value.replace(/\n/g, "<br>")
+      
+    });
+    function renderList() {
+       var posts = JSON.parse(localStorage.getItem('posts')) || [];  // 读;|| [] 防空                                                                                                         
+       var list = document.getElementById('post-list');                                                                                                                                       
+       list.innerHTML = '';                                          // 清空旧卡片                                                                                                            
+       posts.forEach(function (p) {                                                                                                                                                           
+         var card = document.createElement('div');                                                                                                                                            
+         card.className = 'post-card';                                                                                                                                                        
+         card.innerHTML = '<h3>' + p.title + '</h3><p>' + p.content + '</p>';                                                                                                                 
+         list.appendChild(card);                                                                                                                                                              
+       });                                                                                                                                                                                    
+     }
+    renderList();
+    // ===== 年份 =====
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
