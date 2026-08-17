@@ -3,37 +3,16 @@ import './App.css';
 import BlogList from './components/BlogList.jsx';
 import Editor from './components/Editor.jsx';
 
-const STORAGE_KEY = 'posts';
-
-function createId() {
-  return crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-}
-
-// 惰性初始化：坏数据不崩，旧数据补 id/date 字段
-function loadPosts() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const posts = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(posts)) return [];
-    return posts.map((p) => ({
-      id: p.id ?? createId(),
-      title: p.title ?? '',
-      content: p.content ?? '',
-      date: p.date ?? null,
-    }));
-  } catch {
-    return [];
-  }
-}
-
 export default function App() {
   const [view, setView] = useState('list');
   const [editingPost, setEditingPost] = useState(null);
-  const [posts, setPosts] = useState(loadPosts);
+  const [posts, setPosts] = useState([]); // loadPosts()
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-  }, [posts]);
+  useEffect(() => {                                                                                                                                                                        
+       fetch('http://localhost:3000/posts')                                                                                                                                                   
+         .then((res) => res.json())                                                                                                                                                           
+         .then(setPosts);                                                                                                                                                                     
+     }, []);                
 
   const handleNewPost = () => {
     setEditingPost(null);
@@ -46,23 +25,38 @@ export default function App() {
   };
 
   const handleSave = ({ title, content }) => {
-    setPosts((prev) => {
+    
       if (editingPost) {
         return prev.map((p) =>
           p.id === editingPost.id ? { ...p, title, content } : p,
         );
       }
-      return [
-        ...prev,
-        { id: createId(), title, content, date: new Date().toISOString() },
-      ];
-    });
+      else{
+        fetch('http://localhost:3000/posts', {                                                                                                                                               
+           method: 'POST',                                                                                                                                                                    
+           headers: { 'Content-Type': 'application/json' },                                                                                                                                   
+           body: JSON.stringify({ title, content }), 
+      })
+      .then((res) => res.json())
+      .then((newPost) => {
+        setPosts((prev) => [...prev, newPost]);
+      });
+      }
     setView('list');
   };
 
   const handleDelete = (id) => {
     if (!window.confirm('确定删除这篇文章吗？')) return;
-    setPosts((prev) => prev.filter((p) => p.id !== id));
+    fetch(`http://localhost:3000/posts/${id}`, {
+      method: 'DELETE',
+    })
+      .then((res) => {
+        if (res.ok) {
+          setPosts((prev) => prev.filter((post) => post.id !== id));
+        } else {
+          alert('删除失败');
+        }
+      });
   };
 
   return (
