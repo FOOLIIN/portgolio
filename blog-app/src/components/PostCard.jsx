@@ -16,8 +16,12 @@ export default function PostCard({ post, onEdit, onDelete }) {
       {post.date && <p className="post-date">{formatDate(post.date)}</p>}
       <p>{post.content}</p>
       <div className="post-actions">
-        <button type="button" onClick={() => onEdit(post)}>编辑</button>
-        <button type="button" className="delete-btn" onClick={() => onDelete(post.id)}>删除</button>
+        {onEdit && (
+          <button type="button" onClick={() => onEdit(post)}>编辑</button>
+        )}
+        {onDelete && (
+          <button type="button" className="delete-btn" onClick={() => onDelete(post.id)}>删除</button>
+        )}
       </div>
     </div>
   );

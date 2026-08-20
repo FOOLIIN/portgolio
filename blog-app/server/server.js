@@ -1,4 +1,7 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const SECRET_KEY = 'my key is this'; // Replace
 const {MongoClient,ObjectId} = require('mongodb');
 const client = new MongoClient('mongodb://localhost:27017');
 const app = express();
@@ -15,6 +18,57 @@ const cors = require('cors');
 // collection will be set after the Mongo client connects
 let collection;
 
+app.post('/register',async(req,res)=>{
+  try{
+    const {username,password} = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: '用户名和密码必填' });
+    }
+    const existing = await client.db('blog').collection('users').findOne({ username });
+    if (existing) {
+      return res.status(400).json({ message: '用户名已存在' });
+    }
+    const hashedPassword = await bcrypt.hash(password,10);
+    const result = await client.db('blog').collection('users').insertOne({username,password:hashedPassword});
+    res.status(201).json({message:'注册成功'});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '注册失败' });
+  }
+});
+app.post('/login',async(req,res)=>{
+  try{
+    const {username,password} = req.body;
+    const user = await client.db('blog').collection('users').findOne({username});
+    if(!user) return res.status(401).json({message:'用户不存在'});
+    const isPasswordValid = await bcrypt.compare(password,user.password);
+    if(!isPasswordValid) return res.status(401).json({message:'密码错误'});
+    const token = jwt.sign({username},SECRET_KEY,{expiresIn:'7d'});
+    res.json({token});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '登录失败' });
+  }
+});
+function auth(req,res,next){
+  const authHeader = req.headers.authorization;
+  if(!authHeader)return res.status(401).json({message:'未授权'});
+  const token = authHeader.split(' ')[1];
+  try{
+    const decoded = jwt.verify(token,SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+     res.status(401).json({message:'无效的token'});
+  }
+}
+const ADMIN_USER = 'fool';
+function requireAdmin(req,res,next){
+  if(!req.user || req.user.username !== ADMIN_USER){
+    return res.status(403).json({message:'无权限：仅作者可操作'});
+  }
+  next();
+}
 // GET /posts - try DB first, fallback to in-memory posts
 app.get('/posts', async (req, res) => {
   try {
@@ -32,7 +86,7 @@ app.get('/posts', async (req, res) => {
   }
 });
 
-app.post('/posts', async (req, res) => {
+app.post('/posts', auth, requireAdmin, async (req, res) => {
   try {
     const doc = {
       title: req.body.title,
@@ -54,13 +108,29 @@ app.post('/posts', async (req, res) => {
   }
 });
 
-    app.delete('/posts/:id', async (req, res) => {
+    app.delete('/posts/:id', auth, requireAdmin, async (req, res) => {
       try{
         const result = await collection.deleteOne({_id: new ObjectId(req.params.id)});
         result.deletedCount ? res.sendStatus(204) : res.status(404).json({ message: 'Post not found' });
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: '删除失败' });
+      }
+    });
+
+    app.put('/posts/:id', auth, requireAdmin, async (req, res) => {
+      try {
+        const result = await collection.updateOne(
+          { _id: new ObjectId(req.params.id) },
+          { $set: { title: req.body.title, content: req.body.content } }
+        );
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ message: '文章不存在' });
+        }
+        res.json({ message: '更新成功' });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: '更新失败' });
       }
     });
 
