@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -9,8 +11,8 @@ export default function Login({ onLogin }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const url = mode === 'login'
-      ? 'http://localhost:3000/login'
-      : 'http://localhost:3000/register';
+      ? `${API_BASE}/login`
+      : `${API_BASE}/register`;
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -4,6 +4,8 @@ import BlogList from './components/BlogList.jsx';
 import Editor from './components/Editor.jsx';
 import Login from './components/Login.jsx';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function App() {
   const [view, setView] = useState('list');
   const [editingPost, setEditingPost] = useState(null);
@@ -12,7 +14,7 @@ export default function App() {
 
   
   useEffect(() => {                                                                                                                                                                        
-       fetch('http://localhost:3000/posts')                                                                                                                                                   
+       fetch(`${API_BASE}/posts`)                                                                                                                                                   
          .then((res) => res.json())                                                                                                                                                           
          .then(setPosts);                                                                                                                                                                     
      }, []);                
@@ -50,7 +52,7 @@ export default function App() {
   const handleSave = ({ title, content }) => {
     
       if (editingPost) {
-        fetch(`http://localhost:3000/posts/${editingPost.id}`, {
+        fetch(`${API_BASE}/posts/${editingPost.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -72,7 +74,7 @@ export default function App() {
           });
         return;
       }
-      fetch('http://localhost:3000/posts', {                                                                                                                                               
+      fetch(`${API_BASE}/posts`, {                                                                                                                                               
            method: 'POST',                                                                                                                                                                    
            headers: { 'Content-Type': 'application/json'
                      , 'Authorization': `Bearer ${token}`,
@@ -96,7 +98,7 @@ export default function App() {
 
   const handleDelete = (id) => {
     if (!window.confirm('确定删除这篇文章吗？')) return;
-    fetch(`http://localhost:3000/posts/${id}`, {
+    fetch(`${API_BASE}/posts/${id}`, {
       method: 'DELETE',
       headers:{'Authorization': `Bearer ${token}`},
     })

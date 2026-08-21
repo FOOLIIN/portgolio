@@ -1,9 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const SECRET_KEY = 'my key is this'; // Replace
+const SECRET_KEY = process.env.SECRET_KEY || 'my key is this'; // Replace
 const {MongoClient,ObjectId} = require('mongodb');
-const client = new MongoClient('mongodb://localhost:27017');
+const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
 const app = express();
 const cors = require('cors');
 
