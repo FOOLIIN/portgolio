@@ -175,3 +175,55 @@
     flex-direction: column;
   }
 }
+
+/* ===== 首页(Home) ===== */
+#projects { margin-top: 2rem; }
+#repo-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 520px));
+  justify-content: center;
+}
+.repo-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  transition: box-shadow 0.15s ease;
+  text-align: left;
+}
+.repo-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.repo-card h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+.repo-card h3 a { color: var(--accent); text-decoration: none; }
+.repo-card h3 a:hover { text-decoration: underline; }
+.repo-card p { margin: 0 0 .5rem; color: var(--muted); font-size: .9rem; }
+.repo-card span { font-size: .85rem; color: var(--muted); }
+
+/* ===== 导航 ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.header h1 { font-size: 1.25rem; margin: 0; }
+.header nav { display: flex; gap: 0.5rem; }
+.header button {
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.header button:hover { opacity: 0.75; }
+.header nav button.active {
+  background-color: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}

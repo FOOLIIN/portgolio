@@ -3,11 +3,12 @@ import './App.css';
 import BlogList from './components/BlogList.jsx';
 import Editor from './components/Editor.jsx';
 import Login from './components/Login.jsx';
+import Home from './components/Home.jsx';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function App() {
-  const [view, setView] = useState('list');
+  const [view, setView] = useState('home'); // 'list', 'editor', 'login'
   const [editingPost, setEditingPost] = useState(null);
   const [posts, setPosts] = useState([]); // loadPosts()
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -125,6 +126,10 @@ export default function App() {
       <div>
         <header className="header">
           <h1>我的博客</h1>
+          <nav>
+             <button onClick={() => setView('home')}>首页</button>
+             <button onClick={() => setView('list')}>博客</button>
+          </nav>
           <div>
             {isAdmin && (
               <button onClick={handleNewPost}>新建文章</button>
@@ -136,7 +141,9 @@ export default function App() {
             )}
           </div>
         </header>
-        {view === 'list' ? (                                                                                                                                                                 
+        {view === 'home' ? (
+          <Home />
+        ) : view === 'list' ? (                                                                                                                                                                 
            <BlogList posts={posts} onEditPost={isAdmin ? handleEditPost : null} onDeletePost={isAdmin ? handleDelete : null} />                                                                 
          ) : view === 'editor' ? (                                                                                                                                                            
            <Editor initialPost={editingPost} onSave={handleSave} onBack={() => setView('list')} />                                                                                                                                                                     
