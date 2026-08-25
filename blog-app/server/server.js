@@ -1,11 +1,16 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const SECRET_KEY = process.env.SECRET_KEY || 'my key is this'; // Replace
+const SECRET_KEY = process.env.SECRET_KEY;
+if (!SECRET_KEY) {
+  console.error('SECRET_KEY 未设置,拒绝启动(请在 .env 中配置)');
+  process.exit(1);
+}
 const {MongoClient,ObjectId} = require('mongodb');
 const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
 const app = express();
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 
   let posts = [
@@ -13,7 +18,11 @@ const cors = require('cors');
      { id: 2, title: '第二篇', content: 'world', date: '2026-07-21' },
   ];
    app.use(express.json());
-   app.use(cors());
+   app.use(cookieParser());
+   app.use(cors({
+     origin: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(','),
+     credentials: true,
+   }));
 
 // collection will be set after the Mongo client connects
 let collection;
@@ -44,7 +53,13 @@ app.post('/login',async(req,res)=>{
     const isPasswordValid = await bcrypt.compare(password,user.password);
     if(!isPasswordValid) return res.status(401).json({message:'密码错误'});
     const token = jwt.sign({username},SECRET_KEY,{expiresIn:'7d'});
-    res.json({token});
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.COOKIE_SECURE === '1',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.json({ username });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '登录失败' });
@@ -52,8 +67,8 @@ app.post('/login',async(req,res)=>{
 });
 function auth(req,res,next){
   const authHeader = req.headers.authorization;
-  if(!authHeader)return res.status(401).json({message:'未授权'});
-  const token = authHeader.split(' ')[1];
+  const token = (authHeader && authHeader.split(' ')[1]) || req.cookies.token;
+  if(!token)return res.status(401).json({message:'未授权'});
   try{
     const decoded = jwt.verify(token,SECRET_KEY);
     req.user = decoded;
@@ -68,6 +83,21 @@ function requireAdmin(req,res,next){
     return res.status(403).json({message:'无权限：仅作者可操作'});
   }
   next();
+}
+app.get('/me', auth, (req,res) => {
+  res.json({ username: req.user.username });
+});
+app.post('/logout', (req,res) => {
+  res.clearCookie('token');
+  res.json({ message: '已登出' });
+});
+function validatePost(body) {
+  const title = typeof body.title === 'string' ? body.title.trim() : '';
+  const content = typeof body.content === 'string' ? body.content.trim() : '';
+  if (!title || !content) return { error: '标题和内容必填' };
+  if (title.length > 100) return { error: '标题过长(最多100字)' };
+  if (content.length > 20000) return { error: '内容过长(最多20000字)' };
+  return { title, content };
 }
 // GET /posts - try DB first, fallback to in-memory posts
 app.get('/posts', async (req, res) => {
@@ -88,9 +118,11 @@ app.get('/posts', async (req, res) => {
 
 app.post('/posts', auth, requireAdmin, async (req, res) => {
   try {
+    const { title, content, error } = validatePost(req.body);
+    if (error) return res.status(400).json({ message: error });
     const doc = {
-      title: req.body.title,
-      content: req.body.content,
+      title,
+      content,
       date: new Date().toISOString().split('T')[0],
     };
     if (!collection) {
@@ -110,6 +142,7 @@ app.post('/posts', auth, requireAdmin, async (req, res) => {
 
     app.delete('/posts/:id', auth, requireAdmin, async (req, res) => {
       try{
+        if (!collection) return res.status(503).json({ message: '数据库未就绪' });
         const result = await collection.deleteOne({_id: new ObjectId(req.params.id)});
         result.deletedCount ? res.sendStatus(204) : res.status(404).json({ message: 'Post not found' });
       } catch (err) {
@@ -120,9 +153,12 @@ app.post('/posts', auth, requireAdmin, async (req, res) => {
 
     app.put('/posts/:id', auth, requireAdmin, async (req, res) => {
       try {
+        if (!collection) return res.status(503).json({ message: '数据库未就绪' });
+        const { title, content, error } = validatePost(req.body);
+        if (error) return res.status(400).json({ message: error });
         const result = await collection.updateOne(
           { _id: new ObjectId(req.params.id) },
-          { $set: { title: req.body.title, content: req.body.content } }
+          { $set: { title, content } }
         );
         if (result.matchedCount === 0) {
           return res.status(404).json({ message: '文章不存在' });

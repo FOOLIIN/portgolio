@@ -16,6 +16,7 @@ export default function Login({ onLogin }) {
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     })
       .then((res) => res.json())
@@ -28,8 +29,8 @@ export default function Login({ onLogin }) {
             setError(data.message || '注册失败');
           }
         } else {
-          if (data.token) {
-            onLogin(data.token);
+          if (data.username) {
+            onLogin(data.username);
           } else {
             setError(data.message || '登录失败');
           }

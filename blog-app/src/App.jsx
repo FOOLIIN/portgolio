@@ -11,26 +11,20 @@ export default function App() {
   const [view, setView] = useState('home'); // 'list', 'editor', 'login'
   const [editingPost, setEditingPost] = useState(null);
   const [posts, setPosts] = useState([]); // loadPosts()
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [username, setUsername] = useState(null);
 
   
   useEffect(() => {                                                                                                                                                                        
        fetch(`${API_BASE}/posts`)                                                                                                                                                   
          .then((res) => res.json())                                                                                                                                                           
          .then(setPosts);                                                                                                                                                                     
+       fetch(`${API_BASE}/me`, { credentials: 'include' })
+         .then((res) => (res.ok ? res.json() : null))
+         .then((data) => setUsername(data?.username ?? null))
+         .catch(() => setUsername(null));
      }, []);                
 
-  // 从 token 解出当前登录用户名(JWT payload 可读)
-  const getUsername = () => {
-    if (!token) return null;
-    try {
-      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64)).username;
-    } catch {
-      return null;
-    }
-  };
-  const isAdmin = getUsername() === 'fool';
+  const isAdmin = username === 'fool';
 
   const handleNewPost = () => {
     if (!isAdmin) {
@@ -55,10 +49,8 @@ export default function App() {
       if (editingPost) {
         fetch(`${API_BASE}/posts/${editingPost.id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ title, content }),
         })
           .then((res) => {
@@ -77,9 +69,8 @@ export default function App() {
       }
       fetch(`${API_BASE}/posts`, {                                                                                                                                               
            method: 'POST',                                                                                                                                                                    
-           headers: { 'Content-Type': 'application/json'
-                     , 'Authorization': `Bearer ${token}`,
-            },                                                                                                                                   
+           headers: { 'Content-Type': 'application/json' },                                                                                                                                   
+           credentials: 'include',
            body: JSON.stringify({ title, content }), 
       })
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
@@ -101,7 +92,7 @@ export default function App() {
     if (!window.confirm('确定删除这篇文章吗？')) return;
     fetch(`${API_BASE}/posts/${id}`, {
       method: 'DELETE',
-      headers:{'Authorization': `Bearer ${token}`},
+      credentials: 'include',
     })
       .then((res) => {
         if (res.ok) {
@@ -112,14 +103,13 @@ export default function App() {
 
       });
   };
-   const handleLogin = (token) => {
-    setToken(token);
-    localStorage.setItem('token', token);
+   const handleLogin = (loggedInUser) => {
+    setUsername(loggedInUser);
     setView('list');
   };
     const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem('token');
+    fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'include' });
+    setUsername(null);
     setView('list');
   }
   return (
@@ -134,7 +124,7 @@ export default function App() {
             {isAdmin && (
               <button onClick={handleNewPost}>新建文章</button>
             )}
-            {token ? (
+            {username ? (
               <button onClick={handleLogout}>登出</button>
             ) : (
               <button onClick={() => setView('login')}>登录/注册</button>
