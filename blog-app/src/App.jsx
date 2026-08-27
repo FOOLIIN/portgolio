@@ -7,6 +7,39 @@ import Home from './components/Home.jsx';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+function Footer({ onNavigate }) {
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  return (
+    <footer className="site-footer">
+      <div className="footer-identity">
+        <button type="button" className="footer-name" onClick={() => onNavigate('home')}>fool</button>
+        <p className="footer-bio">我是一名普通的大学生,这个站点是我用来学习和展示的</p>
+        <ul className="footer-social">
+          <li>
+            <a href="https://github.com/FOOLIIN" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.3 2 1.8 6.6 1.8 12.2c0 4.5 2.9 8.4 7 9.7.5.1.7-.2.7-.5v-1.7c-2.9.7-3.5-1.3-3.5-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.1-4.7-5 0-1.1.4-2 1.1-2.8-.2-.4-.5-1.5 0-2.8 0 0 .9-.3 2.8 1 .8-.2 1.7-.3 2.6-.3s1.8.1 2.6.3c2-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1.1 1.6 1.1 2.8 0 3.9-2.4 4.8-4.7 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4.1-1.4 7-5.2 7-9.7C22.2 6.6 17.7 2 12 2z" /></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div className="footer-col">
+        <p className="footer-title">导航</p>
+        <ul>
+          <li><button type="button" onClick={() => onNavigate('home')}>首页</button></li>
+          <li><button type="button" onClick={() => onNavigate('list')}>博客</button></li>
+        </ul>
+      </div>
+      <div className="footer-col">
+        <p className="footer-title">其他</p>
+        <ul>
+          <li><a href="https://github.com/FOOLIIN" target="_blank" rel="noopener noreferrer">GitHub 主页</a></li>
+          <li><button type="button" onClick={scrollTop}>回到顶部</button></li>
+        </ul>
+      </div>
+    </footer>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState('home'); // 'list', 'editor', 'login'
   const [editingPost, setEditingPost] = useState(null);
@@ -137,9 +170,10 @@ export default function App() {
            <BlogList posts={posts} onEditPost={isAdmin ? handleEditPost : null} onDeletePost={isAdmin ? handleDelete : null} />                                                                 
          ) : view === 'editor' ? (                                                                                                                                                            
            <Editor initialPost={editingPost} onSave={handleSave} onBack={() => setView('list')} />                                                                                                                                                                     
-         ) : (                                                                                                                                                                                
-           <Login onLogin={handleLogin} />  
-         )}
+          ) : (                                                                                                                                                                                
+            <Login onLogin={handleLogin} />  
+          )}
+          <Footer onNavigate={setView} />
       </div>
   );
   
