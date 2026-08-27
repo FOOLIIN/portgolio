@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm install --registry=https://registry.npmmirror.com
 
 COPY . .
-RUN VITE_API_URL=/api npm run build
+RUN VITE_API_URL=/blog/api npm run build
 
 FROM nginx:alpine
 
